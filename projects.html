@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects – Poorna Sasank Sesetti</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+            mono: ['IBM Plex Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            ink: '#1a1a2e',
+            accent: '#2563eb',
+            warm: '#d97706',
+            muted: '#6b7280',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #f8f7f4; color: #1a1a2e; }
+    .nav-link::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 2px; background: #d97706; transition: width 0.25s ease;
+    }
+    .nav-link { position: relative; }
+    .nav-link:hover::after { width: 100%; }
+    .card-hover { transition: transform 0.8s ease, box-shadow 0.8s ease; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+  </style>
+</head>
+<body class="font-sans">
+
+  <nav class="fixed top-0 w-full z-50 bg-ink/95 backdrop-blur-sm">
+    <div class="max-w-4xl mx-auto px-6 flex items-center justify-between h-14">
+      <span class="font-mono text-sm text-white/60 tracking-wider">PS/</span>
+      <div class="flex gap-6 text-sm font-medium">
+        <a href="index.html#home"     class="nav-link text-white/80 hover:text-white transition-colors py-1">Home</a>
+        <a href="projects.html"       class="nav-link text-white  transition-colors py-1">Projects</a>
+        <a href="index.html#workexp"  class="nav-link text-white/80 hover:text-white transition-colors py-1">Work</a>
+        <a href="index.html#research" class="nav-link text-white/80 hover:text-white transition-colors py-1">Research</a>
+        <a href="blog.html"           class="nav-link text-warm hover:text-yellow-300 transition-colors py-1 font-semibold">Blog</a>
+        <a href="index.html#contact"  class="nav-link text-white/80 hover:text-white transition-colors py-1">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 pt-28 pb-20">
+
+    <div class="mb-10 fade-up">
+      <p class="font-mono text-xs text-muted uppercase tracking-widest mb-1">Portfolio</p>
+      <h1 class="font-serif text-3xl font-semibold">Personal Projects</h1>
+    </div>
+
+    <div class="grid gap-6">
+
+    <!-- BallBot -->
+    <a href="https://github.com/Poorna-Sasank/BallBot.git"
+      target="_blank"
+      class="block card-hover bg-white rounded-xl border border-black/8 p-6 hover:border-black/20 transition-colors">
+      <div class="flex items-start justify-between mb-2">
+        <h3 class="font-semibold text-lg text-ink">
+          BallBot: Autonomous Ball-Following Robot
+        </h3>
+        <i class="fa-brands fa-github text-muted"></i>
+      </div>
+
+      <p class="font-mono text-xs text-muted mb-3">
+        ROS2 · Gazebo Harmonic · OpenCV · Python
+      </p>
+
+      <p class="text-sm text-ink/75 leading-relaxed">
+        Built an autonomous ROS2-based mobile robot in Gazebo that detects
+        and chases a ball using real-time OpenCV vision processing.
+      </p>
+    </a>
+
+
+    <!-- UR5e IK -->
+    <a href="https://github.com/Poorna-Sasank/mujoco_ik_simulation"
+      target="_blank"
+      class="block card-hover bg-white rounded-xl border border-black/8 p-6 hover:border-black/20 transition-colors">
+      <div class="flex items-start justify-between mb-2">
+        <h3 class="font-semibold text-lg text-ink">
+          Optimization-Based IK Control of UR5e in MuJoCo
+        </h3>
+        <i class="fa-brands fa-github text-muted"></i>
+      </div>
+
+      <p class="font-mono text-xs text-muted mb-3">
+        MuJoCo · Python · Optimization · Robotics
+      </p>
+
+      <p class="text-sm text-ink/75 leading-relaxed">
+        Developed a modular inverse kinematics framework for the UR5e arm
+        in MuJoCo, supporting multiple optimization algorithms.
+      </p>
+    </a>
+
+
+    <!-- TurtleBot MQTT -->
+    <a href="https://github.com/Poorna-Sasank/turtlebot3-internet-control.git"
+      target="_blank"
+      class="block card-hover bg-white rounded-xl border border-black/8 p-6 hover:border-black/20 transition-colors">
+      <div class="flex items-start justify-between mb-2">
+        <h3 class="font-semibold text-lg text-ink">
+          MQTT-Based Remote Control of TurtleBot3
+        </h3>
+        <i class="fa-brands fa-github text-muted"></i>
+      </div>
+
+      <p class="font-mono text-xs text-muted mb-3">
+        ROS2 · Gazebo Harmonic · MQTT · Networking
+      </p>
+
+      <p class="text-sm text-ink/75 leading-relaxed">
+        Enabled internet-based remote control of a TurtleBot3 in Gazebo
+        using MQTT integrated with ROS2.
+      </p>
+    </a>
+
+
+    <!-- Placeholder -->
+    <div class="border-2 border-dashed border-black/10 rounded-xl p-6 text-center text-muted text-sm">
+      More projects unfolding ·
+      <a href="blog.html"
+        class="text-accent hover:text-warm transition-colors">
+        Follow the build log
+      </a>
+    </div>
+
+  </div>
+
+    <footer class="text-center text-xs text-muted pt-12 mt-12 border-t border-black/8 font-mono">
+      © 2026 Poorna Sasank Sesetti
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ch 01 – Camera Models & Calibration · VO Build Log</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+            mono: ['IBM Plex Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            ink: '#1a1a2e',
+            accent: '#2563eb',
+            warm: '#d97706',
+            muted: '#6b7280',
+            surface: '#f8f7f4',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #f8f7f4;
+      color: #1a1a2e;
+    }
+
+    /* Nav */
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #d97706;
+      transition: width 0.25s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    /* Prose */
+    .prose h2 {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      color: #1a1a2e;
+    }
+
+    .prose h3 {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+      color: #1a1a2e;
+    }
+
+    .prose p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #1a1a2edd;
+      margin-bottom: 1.1rem;
+    }
+
+    .prose a {
+      color: #2563eb;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .prose a:hover {
+      color: #d97706;
+    }
+
+    /* Code blocks */
+    .prose pre {
+      background: #1a1a2e;
+      color: #e2e8f0;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 1.5rem 0;
+    }
+
+    .prose code:not(pre code) {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12.5px;
+      background: #e5e7eb;
+      color: #374151;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* Callout boxes */
+    .callout {
+      border-left: 3px solid;
+      padding: 0.9rem 1.1rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .callout-challenge {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #7f1d1d;
+    }
+
+    .callout-insight {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1e3a5f;
+    }
+
+    .callout-note {
+      border-color: #d97706;
+      background: #fffbeb;
+      color: #78350f;
+    }
+
+    .callout-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+      opacity: 0.7;
+    }
+
+    /* Chapter nav */
+    .chapter-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      background: white;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .chapter-nav-btn:hover {
+      border-color: #2563eb;
+      color: #2563eb;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-up {
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    /* TOC */
+    .toc-link {
+      display: block;
+      font-size: 13px;
+      color: #6b7280;
+      padding: 3px 0;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .toc-link:hover {
+      color: #2563eb;
+    }
+
+    /* Image caption */
+    .fig-caption {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+
+<body class="font-sans">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 w-full z-50 bg-ink/95 backdrop-blur-sm">
+    <div class="max-w-4xl mx-auto px-6 flex items-center justify-between h-14">
+      <a href="../index.html" class="font-mono text-sm text-white/60 tracking-wider hover:text-warm transition-colors">
+        ← Build Log
+      </a>
+      <div class="flex gap-6 text-sm font-medium">
+        <a href="../../index.html#home" class="nav-link text-white/80 hover:text-white transition-colors py-1">Home</a>
+        <a href="../../projects.html"
+          class="nav-link text-white/80 hover:text-white transition-colors py-1">Projects</a>
+        <a href="../index.html" class="nav-link text-warm transition-colors py-1 font-semibold">Blog</a>
+        <a href="../../index.html#contact"
+          class="nav-link text-white/80 hover:text-white transition-colors py-1">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 pt-28 pb-24">
+
+    <!-- Breadcrumb + meta -->
+    <div class="mb-8 fade-up">
+      <div class="flex items-center gap-2 font-mono text-[11px] text-muted mb-4">
+        <a href="../index.html" class="hover:text-accent transition-colors">Build Log</a>
+        <span>/</span>
+        <span>Visual Odometry</span>
+        <span>/</span>
+        <span class="text-ink">Chapter 01</span>
+      </div>
+
+      <div class="flex items-center gap-2 mb-3">
+        <span class="font-mono text-[10px] uppercase tracking-widest text-warm bg-warm/10 px-2 py-0.5 rounded">Series 01
+          · Ch 01</span>
+        <span class="font-mono text-[10px] text-muted">January 2026 · ~12 min read</span>
+      </div>
+
+      <h1 class="font-serif text-3xl font-semibold leading-tight mb-4">
+        Camera Models, Calibration<br>& the Geometry of Seeing (These are all just placeholders and require many changes)
+      </h1>
+
+      <p class="text-[15px] text-ink/65 max-w-2xl leading-relaxed">
+        Before a robot can know where it is, it needs to understand how it sees.
+        This chapter covers the pinhole camera model, intrinsic parameters, lens distortion,
+        and how I got OpenCV's calibration pipeline working — including the mistakes I made.
+      </p>
+    </div>
+
+    <!-- Two-column layout: article + sidebar TOC -->
+    <div class="flex gap-12 items-start">
+
+      <!-- ARTICLE -->
+      <article class="prose flex-1 min-w-0">
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="why-cameras">Why Start with the Camera Model?</h2>
+        <p>
+          Visual odometry estimates camera motion from a sequence of images. But images are just 2D arrays
+          of pixel values — to reason about 3D geometry from them, you need a precise mathematical relationship
+          between points in 3D space and their projections onto the image plane.
+          That relationship is the camera model.
+        </p>
+        <p>
+          Get this wrong and every downstream computation — feature matching, essential matrix estimation,
+          triangulation — is built on a shaky foundation. So before writing a single line of the VO pipeline,
+          I spent a week making sure I understood this properly.
+        </p>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="pinhole">The Pinhole Camera Model</h2>
+        <p>
+          The simplest useful camera model is the <strong>pinhole model</strong>. Imagine a box with a tiny
+          hole on one side — light rays from the scene pass through the hole and project onto the opposite wall.
+          No lens, no distortion, just pure geometry.
+        </p>
+        <p>
+          A 3D point <code>P = (X, Y, Z)</code> in camera coordinates projects onto the image plane at:
+        </p>
+
+        <pre>u = fx * (X / Z) + cx
+v = fy * (Y / Z) + cy</pre>
+
+        <p>
+          Where <code>fx, fy</code> are the focal lengths in pixels and <code>cx, cy</code> is the
+          principal point (usually near the image center). These four values make up the
+          <strong>intrinsic matrix K</strong>:
+        </p>
+
+        <pre>K = | fx   0   cx |
+    |  0  fy   cy |
+    |  0   0    1 |</pre>
+
+        <div class="callout callout-insight">
+          <span class="callout-label">💡 Key insight</span>
+          The division by Z is what causes the perspective effect — objects farther away appear smaller.
+          This non-linearity is why homogeneous coordinates exist: in homogeneous form, projection becomes a
+          simple matrix multiplication.
+        </div>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="distortion">Lens Distortion — the Real-World Problem</h2>
+        <p>
+          Real lenses don't behave like pinholes. They introduce distortion — mostly <strong>radial</strong>
+          (straight lines appear curved) and <strong>tangential</strong> (the image plane and lens aren't
+          perfectly parallel).
+        </p>
+        <p>
+          OpenCV models radial distortion with coefficients <code>k1, k2, k3</code> and tangential with
+          <code>p1, p2</code>. The corrected pixel coordinates are:
+        </p>
+
+        <pre>r² = x² + y²
+
+x_distorted = x(1 + k1*r² + k2*r⁴ + k3*r⁶) + 2p1*xy + p2(r² + 2x²)
+y_distorted = y(1 + k1*r² + k2*r⁴ + k3*r⁶) + p1(r² + 2y²) + 2p2*xy</pre>
+
+        <div class="callout callout-challenge">
+          <span class="callout-label">⚠️ Challenge I hit</span>
+          I initially tried to skip undistortion to save compute. This was a mistake —
+          even moderate distortion causes the essential matrix estimation to produce garbage results
+          because the epipolar constraint assumes pinhole geometry. Always undistort first.
+        </div>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="calibration">Camera Calibration with OpenCV</h2>
+        <p>
+          To find K and the distortion coefficients, I used OpenCV's checkerboard calibration pipeline.
+          The idea: photograph a checkerboard from many angles, detect the corners precisely,
+          and run an optimization that finds the parameters that best explain where each corner projects.
+        </p>
+
+        <h3 id="collecting-images">Collecting calibration images</h3>
+        <p>
+          I printed a 9×6 checkerboard, taped it to a rigid backing (critical — a floppy board gives bad
+          results), and captured ~40 images from different angles and distances. The key things I learned:
+        </p>
+        <p>
+          Cover the full image — don't just put the board in the center. The distortion is most visible
+          at the edges, so you need coverage there to estimate it well. Also, include tilted views;
+          pure frontal images are nearly degenerate for estimating the focal length.
+        </p>
+
+        <h3 id="the-code">The calibration code</h3>
+        <pre>// Detect corners in each image
+std::vector&lt;std::vector&lt;cv::Point2f&gt;&gt; imagePoints;
+std::vector&lt;std::vector&lt;cv::Point3f&gt;&gt; objectPoints;
+
+cv::Size boardSize(9, 6); // inner corners
+float squareSize = 0.025f; // 25mm squares
+
+for (auto& imgPath : calibImages) {
+    cv::Mat img = cv::imread(imgPath, cv::IMREAD_GRAYSCALE);
+    std::vector&lt;cv::Point2f&gt; corners;
+
+    bool found = cv::findChessboardCorners(img, boardSize, corners,
+        cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE);
+
+    if (found) {
+        // Refine corner positions to sub-pixel accuracy
+        cv::cornerSubPix(img, corners, cv::Size(11, 11), cv::Size(-1, -1),
+            cv::TermCriteria(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 30, 0.001));
+
+        imagePoints.push_back(corners);
+        objectPoints.push_back(generateObjectPoints(boardSize, squareSize));
+    }
+}
+
+// Run calibration
+cv::Mat K, distCoeffs;
+std::vector&lt;cv::Mat&gt; rvecs, tvecs;
+double rms = cv::calibrateCamera(objectPoints, imagePoints,
+                                  img.size(), K, distCoeffs, rvecs, tvecs);
+
+std::cout &lt;&lt; "RMS reprojection error: " &lt;&lt; rms &lt;&lt; std::endl;</pre>
+
+        <div class="callout callout-note">
+          <span class="callout-label">📝 Note</span>
+          The RMS reprojection error should be below ~0.5 pixels for a good calibration.
+          I got 0.38px on my first attempt, which I was pretty happy with.
+          If you're getting 1px+, you probably have a warped board or blurry corner detections.
+        </div>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="undistortion">Undistorting Frames in the VO Pipeline</h2>
+        <p>
+          Once calibrated, I precompute undistortion maps using <code>cv::initUndistortRectifyMap</code>
+          and apply them with <code>cv::remap</code> — much faster than calling <code>cv::undistort</code>
+          per frame:
+        </p>
+
+        <pre>// Precompute once
+cv::Mat map1, map2;
+cv::initUndistortRectifyMap(K, distCoeffs, cv::Mat(), K,
+                             imageSize, CV_16SC2, map1, map2);
+
+// Per frame — fast
+cv::Mat undistorted;
+cv::remap(frame, undistorted, map1, map2, cv::INTER_LINEAR);</pre>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="challenges">Key Challenges & What I Learned</h2>
+
+        <p>
+          <strong>The warped board trap.</strong> My first calibration used a board I'd printed and
+          left on my desk for a few days. It had a slight bow. The calibration looked fine numerically
+          (RMS 0.6px) but the intrinsics were off — I only noticed because features near the image edges
+          weren't matching properly later. Rigid backing is non-negotiable.
+        </p>
+        <p>
+          <strong>Not enough angular diversity.</strong> Fifteen mostly-frontal images gives you a
+          poorly conditioned system — the focal length is nearly unobservable from pure frontal views.
+          I re-did calibration with aggressive tilts (30–45°) and the estimated focal length stabilized.
+        </p>
+        <p>
+          <strong>Storing calibration properly.</strong> I serialize K and distCoeffs to a YAML file
+          using OpenCV's <code>FileStorage</code>. Hardcoding intrinsics into the VO code was an early
+          mistake that made testing on different cameras painful.
+        </p>
+
+        <!-- ─────────────────────────────────── -->
+        <h2 id="next">What's Next</h2>
+        <p>
+          With a calibrated camera and undistorted images, we can now reliably detect and match
+          features between frames — which is exactly what Chapter 2 covers. Specifically, I'll
+          benchmark ORB vs SIFT for the VO use case and explain why the choice matters more than I expected.
+        </p>
+
+        <!-- Chapter nav -->
+        <div class="flex justify-between items-center mt-12 pt-8 border-t border-black/8">
+          <div></div>
+          <a href="ch2.html" class="chapter-nav-btn">
+            Chapter 02: Feature Detection & Matching
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+        </div>
+
+      </article>
+
+      <!-- SIDEBAR TOC -->
+      <aside class="w-52 flex-shrink-0 hidden lg:block sticky top-24 self-start">
+        <p class="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">On this page</p>
+        <nav class="space-y-0.5">
+          <a href="#why-cameras" class="toc-link">Why camera models first?</a>
+          <a href="#pinhole" class="toc-link">The pinhole model</a>
+          <a href="#distortion" class="toc-link">Lens distortion</a>
+          <a href="#calibration" class="toc-link">OpenCV calibration</a>
+          <a href="#the-code" class="toc-link pl-3 text-xs">The code</a>
+          <a href="#undistortion" class="toc-link">Undistorting frames</a>
+          <a href="#challenges" class="toc-link">Challenges & learnings</a>
+          <a href="#next" class="toc-link">What's next</a>
+        </nav>
+
+        <!-- Series progress -->
+        <div class="mt-8 pt-6 border-t border-black/8">
+          <p class="font-mono text-[10px] uppercase tracking-widest text-muted mb-3">Series progress</p>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+              <span class="text-xs text-ink font-medium">Ch 01 · Camera Models</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="ch2.html" class="flex items-center gap-2 group">
+                <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+                <span class="text-xs text-muted group-hover:text-accent transition-colors">Ch 02 · Features</span>
+              </a>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></div>
+              <span class="text-xs text-muted">Ch 03 · Essential Matrix</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-gray-200 flex-shrink-0"></div>
+              <span class="text-xs text-muted">Ch 04 · Triangulation</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div><!-- /flex -->
+
+    <footer class="text-center text-xs text-muted pt-16 mt-16 border-t border-black/8 font-mono">
+      © 2026 Poorna Sasank Sesetti · <a href="../index.html" class="hover:text-accent transition-colors">Back to Build
+        Log</a>
+    </footer>
+  </main>
+
+</body>
+
+</html>
